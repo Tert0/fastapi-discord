@@ -1,0 +1,19 @@
+name: Build and Deploy PyPi
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - uses: casperdcl/deploy-pypi@v2
+        with:
+          password: ${{ secrets.PYPI_TOKEN }}
+          pip: wheel -w dist/ --no-deps .
