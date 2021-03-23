@@ -16,5 +16,6 @@ setup(
         'aiohttp',
         'cachetools'
     ],
-    python_requires=">=3.5"
+    python_requires=">=3.5",
+    url='https://github.com/Tert0/fastapi-discord'
 )
