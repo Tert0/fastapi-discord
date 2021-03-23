@@ -1,0 +1,4 @@
+fastapi
+aiohttp
+uvicorn
+cachetools
