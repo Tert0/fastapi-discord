@@ -10,7 +10,7 @@ class Guild(object):
         self.name = payload["name"]
         self.icon = payload["icon"]
         self.id = str(payload["id"])
-        self.icon_url = f'https://cdn.discordapp.com/icons/{self.id}/{self.icon}.png'
+        self.icon_url = f'https://cdn.discordapp.com/icons/{self.id}/{self.icon}.png' if self.icon != None else None
         self.owner = bool(payload["owner"])
         self.permissions = payload["permissions"]
         self.features = list(payload["features"])
