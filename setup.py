@@ -5,7 +5,7 @@ readme = open('README.md', 'r').read()
 setup(
     name='fastapi_discord',
     packages=find_packages(),
-    version='0.0.8',
+    version='0.1.2',
     description='Discord OAuth FastAPI extension for APIs',
     long_description=readme,
     long_description_content_type="text/markdown",
