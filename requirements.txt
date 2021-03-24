@@ -1,4 +1,4 @@
 fastapi
 aiohttp
 uvicorn
-cachetools
+aiocache

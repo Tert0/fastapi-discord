@@ -3,19 +3,16 @@ class Guild(object):
     name: str
     icon: str
     owner: bool
-    owner_id: str = None
     permissions: int
-    permissions_new: int
     features: list[str]
 
     def __init__(self, payload: dict):
         self.name = payload["name"]
         self.icon = payload["icon"]
         self.id = str(payload["id"])
+        self.icon_url = f'https://cdn.discordapp.com/icons/{self.id}/{self.icon}.png'
         self.owner = bool(payload["owner"])
-        self.owner_id = payload["owner_id"]
         self.permissions = payload["permissions"]
-        self.permissions_new = payload["permissions_new"]
         self.features = list(payload["features"])
 
     @property
@@ -24,9 +21,8 @@ class Guild(object):
             'id': self.id,
             'name': self.name,
             'icon': self.icon,
+            'icon_url': self.icon_url,
             'owner': self.owner,
-            'owner_id': self.owner_id,
             'permissions': self.permissions,
-            'permissions_new': self.permissions_new,
             'features': self.features
         }
