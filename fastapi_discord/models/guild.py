@@ -1,10 +1,12 @@
+from typing import List
+
 class Guild(object):
     id: str = None
     name: str
     icon: str
     owner: bool
     permissions: int
-    features: list[str]
+    features: List[str]
 
     def __init__(self, payload: dict):
         self.name = payload["name"]
