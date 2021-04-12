@@ -1,7 +1,7 @@
 # FastAPI Discord (OAuth)
 Support for "Login with Discord"/ Discord OAuth for FastAPI.
 # Install
-PIP Package -> Coming Soon
+PIP Package `fastapi-discord`
 # Example
 You can find the Example in `expamples/`
 ```python
