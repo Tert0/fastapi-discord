@@ -25,7 +25,7 @@ class DiscordOAuthClient:
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
-        self.scopes = ' '.join(scope for scope in scopes)
+        self.scopes = '%20'.join(scope for scope in scopes)
 
     @property
     def oauth_login_url(self):
