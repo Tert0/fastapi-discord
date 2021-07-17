@@ -75,6 +75,18 @@ class DiscordOAuthClient:
                 resp = await resp.json()
                 return resp.get('access_token'), resp.get('refresh_token')
 
+    async def refresh_access_token(self, refresh_token: str):
+        payload = {
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token,
+        }
+        async with aiohttp.ClientSession() as session:
+            async with session.post(DISCORD_TOKEN_URL, data=payload) as resp:
+                resp = await resp.json()
+                return resp.get('access_token'), resp.get('refresh_token')
+
     async def user(self, request: Request):
         route = '/users/@me'
         token = self.get_token(request)

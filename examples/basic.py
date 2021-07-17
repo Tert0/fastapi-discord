@@ -42,6 +42,15 @@ async def auth(request: Request):
         return 'False'
 
 
+@app.get('/refresh')
+async def refresh(refresh_token: str):
+    token, refresh_token = await discord.refresh_access_token(refresh_token)
+    return {
+        "access_token": token,
+        "refresh_token": refresh_token
+    }
+
+
 @app.exception_handler(Unauthorized)
 async def unauthorized_error_handler(request: Request, e: Unauthorized):
     return JSONResponse({
