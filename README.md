@@ -4,7 +4,7 @@ Support for "Login with Discord"/ Discord OAuth for FastAPI.
 PIP Package `fastapi-discord`
 # Example
 You can find the Example in `expamples/`
-```python
+```py
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi_discord import DiscordOAuthClient, Unauthorized, RateLimited
@@ -47,6 +47,15 @@ async def auth(request: Request):
         return f'{auth}'
     except Unauthorized:
         return 'False'
+
+
+@app.get('/refresh')
+async def refresh(refresh_token: str):
+    token, refresh_token = await discord.refresh_access_token(refresh_token)
+    return {
+        "access_token": token,
+        "refresh_token": refresh_token
+    }
 
 
 @app.exception_handler(Unauthorized)
