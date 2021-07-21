@@ -1,30 +1,20 @@
-from typing import List
+from typing import List, Optional
+from pydantic import BaseModel
 
-class Guild(object):
+from .role import Role
+
+
+class GuildPreview(BaseModel):
     id: str = None
     name: str
-    icon: str
+    icon: Optional[str]
     owner: bool
     permissions: int
     features: List[str]
 
-    def __init__(self, payload: dict):
-        self.name = payload["name"]
-        self.icon = payload["icon"]
-        self.id = str(payload["id"])
-        self.icon_url = f'https://cdn.discordapp.com/icons/{self.id}/{self.icon}.png' if self.icon != None else None
-        self.owner = bool(payload["owner"])
-        self.permissions = payload["permissions"]
-        self.features = list(payload["features"])
 
-    @property
-    def dict(self) -> dict:
-        return {
-            'id': self.id,
-            'name': self.name,
-            'icon': self.icon,
-            'icon_url': self.icon_url,
-            'owner': self.owner,
-            'permissions': self.permissions,
-            'features': self.features
-        }
+class Guild(GuildPreview):
+    owner_id: Optional[int]
+    verification_level: Optional[int]
+    default_message_notifications: Optional[int]
+    roles: Optional[List[Role]]
