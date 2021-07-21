@@ -1,11 +1,13 @@
+from typing import Optional, List
+
 import aiohttp
-from fastapi import Request
-from .models import User, Guild
-from .config import DISCORD_URL, DISCORD_API_URL, DISCORD_TOKEN_URL, DISCORD_OAUTH_URL, DISCORD_OAUTH_AUTHENTICATION_URL
-from .exeptions import Unauthorized, RateLimited, InvalidRequest
-import re
+from fastapi import Request, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
+from .models import User, Guild, GuildPreview
+from .config import DISCORD_API_URL, DISCORD_TOKEN_URL, DISCORD_OAUTH_AUTHENTICATION_URL
+from .exeptions import Unauthorized, RateLimited, ScopeMissing
 from aiocache import cached
-from functools import wraps
 
 
 class DiscordOAuthClient:
@@ -88,14 +90,18 @@ class DiscordOAuthClient:
                 return resp.get('access_token'), resp.get('refresh_token')
 
     async def user(self, request: Request):
+        if "identify" not in self.scopes:
+            raise ScopeMissing("identify")
         route = '/users/@me'
         token = self.get_token(request)
-        return User(await self.request(route, token))
+        return User(**(await self.request(route, token)))
 
-    async def guilds(self, request: Request):
+    async def guilds(self, request: Request) -> List[GuildPreview]:
+        if "guilds" not in self.scopes:
+            raise ScopeMissing("guilds")
         route = '/users/@me/guilds'
         token = self.get_token(request)
-        return [Guild(guild) for guild in await self.request(route, token)]
+        return [Guild(**guild) for guild in await self.request(route, token)]
 
     def get_token(self, request: Request):
         authorization_header = request.headers.get("Authorization")
@@ -116,12 +122,6 @@ class DiscordOAuthClient:
         except Unauthorized:
             return False
 
-    def requires_authorization(self, view):
-        @wraps(view)
-        async def wrapper(*args, **kwargs):
-            request: Request = kwargs['request']
-            if not await self.isAuthenticated(self.get_token(request)):
-                raise Unauthorized
-            return await view(*args, **kwargs)
-
-        return wrapper
+    async def requires_authorization(self, bearer: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer())):
+        if not await self.isAuthenticated(bearer.credentials):
+            raise Unauthorized
