@@ -5,10 +5,13 @@ PIP Package `fastapi-discord`
 # Example
 You can find the Example in `expamples/`
 ```py
-from fastapi import FastAPI, Request
+from typing import List
+
+from fastapi import FastAPI, Depends
 from fastapi.responses import JSONResponse
-from fastapi_discord import DiscordOAuthClient, Unauthorized, RateLimited
-import uvicorn
+from fastapi_discord import DiscordOAuthClient, Unauthorized, RateLimited, User
+
+from fastapi_discord.models import GuildPreview
 
 app = FastAPI()
 
@@ -32,59 +35,45 @@ async def callback(code: str):
     }
 
 
-@app.get("/hello")
-@discord.requires_authorization
-async def hello(request: Request):
-    return await discord.user(request)
-    return f'Hello {user.username}#{user.discriminator}!'
-
-
-@app.get('/authenticated')
-async def auth(request: Request):
+@app.get('/authenticated', dependencies=[Depends(discord.requires_authorization)], response_model=bool)
+async def isAuthenticated(token: str = Depends(discord.get_token)):
     try:
-        token = discord.get_token(request)
         auth = await discord.isAuthenticated(token)
-        return f'{auth}'
+        return auth
     except Unauthorized:
-        return 'False'
-
-
-@app.get('/refresh')
-async def refresh(refresh_token: str):
-    token, refresh_token = await discord.refresh_access_token(refresh_token)
-    return {
-        "access_token": token,
-        "refresh_token": refresh_token
-    }
+        return False
 
 
 @app.exception_handler(Unauthorized)
-async def unauthorized_error_handler(request: Request, e: Unauthorized):
+async def unauthorized_error_handler(_, __):
     return JSONResponse({
         "error": "Unauthorized"
-    })
+    }, status_code=401)
 
 
 @app.exception_handler(RateLimited)
-async def ratelimit_error_handler(request: Request, e: RateLimited):
+async def rate_limit_error_handler(_, e: RateLimited):
     return JSONResponse({
         "error": "RateLimited",
         "retry": e.retry_after,
         "message": e.message
-    })
+    }, status_code=429)
 
 
-@app.get("/require_auth")
-@discord.requires_authorization
-async def test(request: Request):
-    return 'Hello!'
+@app.get("/user", dependencies=[Depends(discord.requires_authorization)], response_model=User)
+async def get_user(user: User = Depends(discord.user)):
+    return user
 
 
-uvicorn.run(app, port=5000)
+@app.get("/guilds", dependencies=[Depends(discord.requires_authorization)], response_model=List[GuildPreview])
+async def get_guilds(guilds: List = Depends(discord.guilds)):
+    return guilds
 ```
 # Inspired by
 [Starlette-Discord](https://github.com/nwunderly/starlette-discord)
+
 [Quart-Discord-OAuth](https://github.com/Tert0/Quart-Discord-OAuth/)
+
 [Quart-Discord](https://github.com/jnawk/quart-discord)
 
 Thanks to @jnawk and @nwunderly
