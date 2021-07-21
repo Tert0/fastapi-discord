@@ -15,3 +15,11 @@ class RateLimited(Exception):
         self.message = json['message']
         self.retry_after = json["retry_after"]
         super().__init__(self.message)
+
+
+class ScopeMissing(Exception):
+    scope: str
+
+    def __init__(self, scope: str):
+        self.scope = scope
+        super().__init__(self.scope)
