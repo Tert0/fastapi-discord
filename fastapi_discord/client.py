@@ -6,7 +6,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from .models import User, Guild, GuildPreview
 from .config import DISCORD_API_URL, DISCORD_TOKEN_URL, DISCORD_OAUTH_AUTHENTICATION_URL
-from .exeptions import Unauthorized, RateLimited, ScopeMissing
+from .exceptions import Unauthorized, RateLimited, ScopeMissing
 from aiocache import cached
 
 
