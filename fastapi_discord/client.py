@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 import aiohttp
 from fastapi import Request, Depends
@@ -29,8 +29,7 @@ class DiscordOAuthClient:
         self.redirect_uri = redirect_uri
         self.scopes = "%20".join(scope for scope in scopes)
 
-    @property
-    def oauth_login_url(self):
+    def get_oauth_login_url(self, state: Optional[str] = None):
         """
 
         Returns a Discord Login URL
@@ -40,10 +39,14 @@ class DiscordOAuthClient:
         redirect_uri = f"redirect_uri={self.redirect_uri}"
         scopes = f"scope={self.scopes}"
         response_type = "response_type=code"
-        return f"{DISCORD_OAUTH_AUTHENTICATION_URL}?{client_id}&{redirect_uri}&{scopes}&{response_type}"
+        state = f"&state={state}" if state else ""
+        return f"{DISCORD_OAUTH_AUTHENTICATION_URL}?{client_id}&{redirect_uri}&{scopes}&{response_type}{state}"
+
+    oauth_login_url = property(get_oauth_login_url)
 
     @cached(ttl=550)
     async def request(self, route, token=None, method="GET"):
+        headers: Dict = {}
         if token:
             headers = {"Authorization": f"Bearer {token}"}
         resp = None
