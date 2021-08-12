@@ -1,4 +1,4 @@
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Literal, Tuple, TypedDict, Union
 
 import aiohttp
 from fastapi import Request, Depends
@@ -9,6 +9,30 @@ from .config import DISCORD_API_URL, DISCORD_TOKEN_URL, DISCORD_OAUTH_AUTHENTICA
 from .exceptions import Unauthorized, RateLimited, ScopeMissing
 from aiocache import cached
 
+class RefreshTokenPayload(TypedDict):
+    client_id: str
+    client_secret: str
+    grant_type: Literal["refresh_token"]
+    refresh_token: str
+
+
+class TokenGrantPayload(TypedDict):
+    client_id: str
+    client_secret: str
+    grant_type: Literal["authorization_code"]
+    code: str
+    redirect_uri: str
+
+
+class TokenResponse(TypedDict):
+    access_token: str
+    token_type: str
+    expires_in: int
+    refresh_token: str
+    scope: str
+
+
+PAYLOAD = Union[TokenGrantPayload, RefreshTokenPayload]
 
 class DiscordOAuthClient:
     """Client for Discord Oauth2.
@@ -63,32 +87,32 @@ class DiscordOAuthClient:
         if resp.status == 429:
             raise RateLimited(data, resp.headers)
         return data
-
-    async def get_access_token(self, code: str):
-        payload = {
+    
+    async def get_token_response(self, payload: PAYLOAD) -> TokenResponse:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(DISCORD_TOKEN_URL, data=payload) as resp:
+                return await resp.json()
+    
+    async def get_access_token(self, code: str) -> Tuple[str, str]:
+        payload: TokenGrantPayload = {
             "client_id": self.client_id,
             "client_secret": self.client_secret,
             "grant_type": "authorization_code",
             "code": code,
-            "redirect_uri": self.redirect_uri,
-            "scope": self.scopes,
+            "redirect_uri": self.redirect_uri
         }
-        async with aiohttp.ClientSession() as session:
-            async with session.post(DISCORD_TOKEN_URL, data=payload) as resp:
-                resp = await resp.json()
-                return resp.get("access_token"), resp.get("refresh_token")
+        resp = await self.get_token_response(payload)
+        return resp.get("access_token"), resp.get("refresh_token")
 
-    async def refresh_access_token(self, refresh_token: str):
-        payload = {
+    async def refresh_access_token(self, refresh_token: str) -> Tuple[str, str]:
+        payload: RefreshTokenPayload = {
             "client_id": self.client_id,
             "client_secret": self.client_secret,
             "grant_type": "refresh_token",
             "refresh_token": refresh_token,
         }
-        async with aiohttp.ClientSession() as session:
-            async with session.post(DISCORD_TOKEN_URL, data=payload) as resp:
-                resp = await resp.json()
-                return resp.get("access_token"), resp.get("refresh_token")
+        resp = await self.get_token_response(payload)
+        return resp.get("access_token"), resp.get("refresh_token")
 
     async def user(self, request: Request):
         if "identify" not in self.scopes:
