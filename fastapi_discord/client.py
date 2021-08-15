@@ -1,9 +1,10 @@
-from typing import Dict, List, Literal, Optional, Tuple, TypedDict, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import aiohttp
 from aiocache import cached
 from fastapi import Depends, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from typing_extensions import TypedDict, Literal
 
 from .config import DISCORD_API_URL, DISCORD_OAUTH_AUTHENTICATION_URL, DISCORD_TOKEN_URL
 from .exceptions import RateLimited, ScopeMissing, Unauthorized
