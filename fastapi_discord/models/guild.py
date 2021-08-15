@@ -1,11 +1,12 @@
 from typing import List, Optional
+
 from pydantic import BaseModel
 
 from .role import Role
 
 
 class GuildPreview(BaseModel):
-    id: str = None
+    id: str
     name: str
     icon: Optional[str]
     owner: bool

@@ -1,13 +1,14 @@
-from typing import Optional, List, Dict, Literal, Tuple, TypedDict, Union
+from typing import Dict, List, Literal, Optional, Tuple, TypedDict, Union
 
 import aiohttp
-from fastapi import Request, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-
-from .models import User, Guild, GuildPreview
-from .config import DISCORD_API_URL, DISCORD_TOKEN_URL, DISCORD_OAUTH_AUTHENTICATION_URL
-from .exceptions import Unauthorized, RateLimited, ScopeMissing
 from aiocache import cached
+from fastapi import Depends, Request
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+from .config import DISCORD_API_URL, DISCORD_OAUTH_AUTHENTICATION_URL, DISCORD_TOKEN_URL
+from .exceptions import RateLimited, ScopeMissing, Unauthorized
+from .models import Guild, GuildPreview, User
+
 
 class RefreshTokenPayload(TypedDict):
     client_id: str
@@ -33,6 +34,7 @@ class TokenResponse(TypedDict):
 
 
 PAYLOAD = Union[TokenGrantPayload, RefreshTokenPayload]
+
 
 class DiscordOAuthClient:
     """Client for Discord Oauth2.
@@ -87,19 +89,19 @@ class DiscordOAuthClient:
         if resp.status == 429:
             raise RateLimited(data, resp.headers)
         return data
-    
+
     async def get_token_response(self, payload: PAYLOAD) -> TokenResponse:
         async with aiohttp.ClientSession() as session:
             async with session.post(DISCORD_TOKEN_URL, data=payload) as resp:
                 return await resp.json()
-    
+
     async def get_access_token(self, code: str) -> Tuple[str, str]:
         payload: TokenGrantPayload = {
             "client_id": self.client_id,
             "client_secret": self.client_secret,
             "grant_type": "authorization_code",
             "code": code,
-            "redirect_uri": self.redirect_uri
+            "redirect_uri": self.redirect_uri,
         }
         resp = await self.get_token_response(payload)
         return resp.get("access_token"), resp.get("refresh_token")
@@ -147,6 +149,8 @@ class DiscordOAuthClient:
         except Unauthorized:
             return False
 
-    async def requires_authorization(self, bearer: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer())):
+    async def requires_authorization(
+        self, bearer: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer())
+    ):
         if not await self.isAuthenticated(bearer.credentials):
             raise Unauthorized
