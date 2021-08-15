@@ -72,7 +72,9 @@ class DiscordOAuthClient:
     oauth_login_url = property(get_oauth_login_url)
 
     @cached(ttl=550)
-    async def request(self, route, token=None, method="GET"):
+    async def request(
+        self, route: str, token: str = None, method: Literal["GET", "POST"] = "GET"
+    ):
         headers: Dict = {}
         if token:
             headers = {"Authorization": f"Bearer {token}"}
@@ -81,10 +83,13 @@ class DiscordOAuthClient:
             async with aiohttp.ClientSession() as session:
                 resp = await session.get(f"{DISCORD_API_URL}{route}", headers=headers)
                 data = await resp.json()
-        if method == "POST":
+        elif method == "POST":
             async with aiohttp.ClientSession() as session:
                 resp = await session.post(f"{DISCORD_API_URL}{route}", headers=headers)
                 data = await resp.json()
+        # Technically response can't be None, but this is a good check
+        if resp is None:
+            raise
         if resp.status == 401:
             raise Unauthorized
         if resp.status == 429:
@@ -153,5 +158,7 @@ class DiscordOAuthClient:
     async def requires_authorization(
         self, bearer: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer())
     ):
+        if bearer is None:
+            raise Unauthorized
         if not await self.isAuthenticated(bearer.credentials):
             raise Unauthorized
