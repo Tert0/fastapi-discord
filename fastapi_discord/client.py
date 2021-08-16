@@ -95,7 +95,7 @@ class DiscordOAuthClient:
         resp = await self.client_session.post(DISCORD_TOKEN_URL, data=payload)
         return await resp.json()
 
-    async def get_access_token(self, code: str) -> Tuple[str, str]:
+    async def get_access_token(self, code: str) -> Tuple[Optional[str], Optional[str]]:
         payload: TokenGrantPayload = {
             "client_id": self.client_id,
             "client_secret": self.client_secret,
@@ -106,7 +106,7 @@ class DiscordOAuthClient:
         resp = await self.get_token_response(payload)
         return resp.get("access_token"), resp.get("refresh_token")
 
-    async def refresh_access_token(self, refresh_token: str) -> Tuple[str, str]:
+    async def refresh_access_token(self, refresh_token: str) -> Tuple[Optional[str], Optional[str]]:
         payload: RefreshTokenPayload = {
             "client_id": self.client_id,
             "client_secret": self.client_secret,
