@@ -73,9 +73,7 @@ class DiscordOAuthClient:
     oauth_login_url = property(get_oauth_login_url)
 
     @cached(ttl=550)
-    async def request(
-        self, route: str, token: str = None, method: Literal["GET", "POST"] = "GET"
-    ):
+    async def request(self, route: str, token: str = None, method: Literal["GET", "POST"] = "GET"):
         headers: Dict = {}
         if token:
             headers = {"Authorization": f"Bearer {token}"}
@@ -151,9 +149,7 @@ class DiscordOAuthClient:
         except Unauthorized:
             return False
 
-    async def requires_authorization(
-        self, bearer: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer())
-    ):
+    async def requires_authorization(self, bearer: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer())):
         if bearer is None:
             raise Unauthorized
         if not await self.isAuthenticated(bearer.credentials):

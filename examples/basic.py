@@ -49,9 +49,7 @@ async def rate_limit_error_handler(_, e: RateLimited):
     )
 
 
-@app.get(
-    "/user", dependencies=[Depends(discord.requires_authorization)], response_model=User
-)
+@app.get("/user", dependencies=[Depends(discord.requires_authorization)], response_model=User)
 async def get_user(user: User = Depends(discord.user)):
     return user
 
