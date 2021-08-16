@@ -55,6 +55,7 @@ class DiscordOAuthClient:
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
         self.scopes = "%20".join(scope for scope in scopes)
+        self.client_session: aiohttp.ClientSession = aiohttp.ClientSession()
 
     def get_oauth_login_url(self, state: Optional[str] = None):
         """
@@ -80,13 +81,11 @@ class DiscordOAuthClient:
             headers = {"Authorization": f"Bearer {token}"}
         resp = None
         if method == "GET":
-            async with aiohttp.ClientSession() as session:
-                resp = await session.get(f"{DISCORD_API_URL}{route}", headers=headers)
-                data = await resp.json()
+            resp = await self.client_session.get(f"{DISCORD_API_URL}{route}", headers=headers)
+            data = await resp.json()
         elif method == "POST":
-            async with aiohttp.ClientSession() as session:
-                resp = await session.post(f"{DISCORD_API_URL}{route}", headers=headers)
-                data = await resp.json()
+            resp = await self.client_session.post(f"{DISCORD_API_URL}{route}", headers=headers)
+            data = await resp.json()
         # Technically response can't be None, but this is a good check
         if resp is None:
             raise
@@ -97,9 +96,8 @@ class DiscordOAuthClient:
         return data
 
     async def get_token_response(self, payload: PAYLOAD) -> TokenResponse:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(DISCORD_TOKEN_URL, data=payload) as resp:
-                return await resp.json()
+        resp = await self.client_session.post(DISCORD_TOKEN_URL, data=payload)
+        return await resp.json()
 
     async def get_access_token(self, code: str) -> Tuple[str, str]:
         payload: TokenGrantPayload = {
