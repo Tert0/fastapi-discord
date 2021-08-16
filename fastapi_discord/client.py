@@ -79,16 +79,14 @@ class DiscordOAuthClient:
         headers: Dict = {}
         if token:
             headers = {"Authorization": f"Bearer {token}"}
-        resp = None
         if method == "GET":
             resp = await self.client_session.get(f"{DISCORD_API_URL}{route}", headers=headers)
             data = await resp.json()
         elif method == "POST":
             resp = await self.client_session.post(f"{DISCORD_API_URL}{route}", headers=headers)
             data = await resp.json()
-        # Technically response can't be None, but this is a good check
-        if resp is None:
-            raise
+        else:
+            raise Exception("Other HTTP than GET and POST are currently not Supported")
         if resp.status == 401:
             raise Unauthorized
         if resp.status == 429:
