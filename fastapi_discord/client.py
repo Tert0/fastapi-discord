@@ -7,7 +7,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from typing_extensions import TypedDict, Literal
 
 from .config import DISCORD_API_URL, DISCORD_OAUTH_AUTHENTICATION_URL, DISCORD_TOKEN_URL
-from .exceptions import RateLimited, ScopeMissing, Unauthorized
+from .exceptions import RateLimited, ScopeMissing, Unauthorized, InvalidToken
 from .models import Guild, GuildPreview, User
 
 
@@ -36,6 +36,31 @@ class TokenResponse(TypedDict):
 
 PAYLOAD = Union[TokenGrantPayload, RefreshTokenPayload]
 
+def _tokens(resp: TokenResponse) -> Union[str, str]:
+    """
+        Extracts tokens from TokenResponse
+
+        Parameters
+        ----------
+        resp: TokenResponse
+            Response 
+        
+        Returns
+        -------
+        Union[str, str]
+            An union of access_token and refresh_token
+        
+        Raises
+        ------
+        InvalidToken
+            If tokens are `None`
+        
+    """
+    access_token, refresh_token = resp.get("access_token"), resp.get("refresh_token")
+    if access_token is None or refresh_token is None:
+        raise InvalidToken("Tokens can't be None")
+    return access_token, refresh_token
+    
 
 class DiscordOAuthClient:
     """Client for Discord Oauth2.
@@ -95,7 +120,7 @@ class DiscordOAuthClient:
         async with self.client_session.post(DISCORD_TOKEN_URL, data=payload) as resp:
             return await resp.json()
 
-    async def get_access_token(self, code: str) -> Tuple[Optional[str], Optional[str]]:
+    async def get_access_token(self, code: str) -> Tuple[str, str]:
         payload: TokenGrantPayload = {
             "client_id": self.client_id,
             "client_secret": self.client_secret,
@@ -104,9 +129,9 @@ class DiscordOAuthClient:
             "redirect_uri": self.redirect_uri,
         }
         resp = await self.get_token_response(payload)
-        return resp.get("access_token"), resp.get("refresh_token")
+        return _tokens(resp)
 
-    async def refresh_access_token(self, refresh_token: str) -> Tuple[Optional[str], Optional[str]]:
+    async def refresh_access_token(self, refresh_token: str) -> Tuple[str, str]:
         payload: RefreshTokenPayload = {
             "client_id": self.client_id,
             "client_secret": self.client_secret,
@@ -114,7 +139,7 @@ class DiscordOAuthClient:
             "refresh_token": refresh_token,
         }
         resp = await self.get_token_response(payload)
-        return resp.get("access_token"), resp.get("refresh_token")
+        return _tokens(resp)
 
     async def user(self, request: Request):
         if "identify" not in self.scopes:
