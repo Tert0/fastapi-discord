@@ -37,7 +37,7 @@ class TokenResponse(TypedDict):
 PAYLOAD = Union[TokenGrantPayload, RefreshTokenPayload]
 
 
-def _tokens(resp: TokenResponse) -> Union[str, str]:
+def _tokens(resp: TokenResponse) -> Tuple[str, str]:
     """
     Extracts tokens from TokenResponse
 
@@ -48,7 +48,7 @@ def _tokens(resp: TokenResponse) -> Union[str, str]:
 
     Returns
     -------
-    Union[str, str]
+    Tuple[str, str]
         An union of access_token and refresh_token
 
     Raises
