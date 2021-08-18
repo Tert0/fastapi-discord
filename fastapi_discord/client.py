@@ -36,31 +36,32 @@ class TokenResponse(TypedDict):
 
 PAYLOAD = Union[TokenGrantPayload, RefreshTokenPayload]
 
+
 def _tokens(resp: TokenResponse) -> Union[str, str]:
     """
-        Extracts tokens from TokenResponse
+    Extracts tokens from TokenResponse
 
-        Parameters
-        ----------
-        resp: TokenResponse
-            Response 
-        
-        Returns
-        -------
-        Union[str, str]
-            An union of access_token and refresh_token
-        
-        Raises
-        ------
-        InvalidToken
-            If tokens are `None`
-        
+    Parameters
+    ----------
+    resp: TokenResponse
+        Response
+
+    Returns
+    -------
+    Union[str, str]
+        An union of access_token and refresh_token
+
+    Raises
+    ------
+    InvalidToken
+        If tokens are `None`
+
     """
     access_token, refresh_token = resp.get("access_token"), resp.get("refresh_token")
     if access_token is None or refresh_token is None:
         raise InvalidToken("Tokens can't be None")
     return access_token, refresh_token
-    
+
 
 class DiscordOAuthClient:
     """Client for Discord Oauth2.
@@ -98,15 +99,21 @@ class DiscordOAuthClient:
     oauth_login_url = property(get_oauth_login_url)
 
     @cached(ttl=550)
-    async def request(self, route: str, token: str = None, method: Literal["GET", "POST"] = "GET"):
+    async def request(
+        self, route: str, token: str = None, method: Literal["GET", "POST"] = "GET"
+    ):
         headers: Dict = {}
         if token:
             headers = {"Authorization": f"Bearer {token}"}
         if method == "GET":
-            async with self.client_session.get(f"{DISCORD_API_URL}{route}", headers=headers) as resp:
+            async with self.client_session.get(
+                f"{DISCORD_API_URL}{route}", headers=headers
+            ) as resp:
                 data = await resp.json()
         elif method == "POST":
-            async with self.client_session.post(f"{DISCORD_API_URL}{route}", headers=headers) as resp:
+            async with self.client_session.post(
+                f"{DISCORD_API_URL}{route}", headers=headers
+            ) as resp:
                 data = await resp.json()
         else:
             raise Exception("Other HTTP than GET and POST are currently not Supported")
@@ -174,7 +181,9 @@ class DiscordOAuthClient:
         except Unauthorized:
             return False
 
-    async def requires_authorization(self, bearer: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer())):
+    async def requires_authorization(
+        self, bearer: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer())
+    ):
         if bearer is None:
             raise Unauthorized
         if not await self.isAuthenticated(bearer.credentials):

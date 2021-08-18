@@ -19,4 +19,6 @@ class User(BaseModel):
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        self.avatar_url = f"https://cdn.discordapp.com/avatars/{self.id}/{self.avatar}.png"
+        self.avatar_url = (
+            f"https://cdn.discordapp.com/avatars/{self.id}/{self.avatar}.png"
+        )
