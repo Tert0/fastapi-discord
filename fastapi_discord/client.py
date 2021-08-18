@@ -99,21 +99,15 @@ class DiscordOAuthClient:
     oauth_login_url = property(get_oauth_login_url)
 
     @cached(ttl=550)
-    async def request(
-        self, route: str, token: str = None, method: Literal["GET", "POST"] = "GET"
-    ):
+    async def request(self, route: str, token: str = None, method: Literal["GET", "POST"] = "GET"):
         headers: Dict = {}
         if token:
             headers = {"Authorization": f"Bearer {token}"}
         if method == "GET":
-            async with self.client_session.get(
-                f"{DISCORD_API_URL}{route}", headers=headers
-            ) as resp:
+            async with self.client_session.get(f"{DISCORD_API_URL}{route}", headers=headers) as resp:
                 data = await resp.json()
         elif method == "POST":
-            async with self.client_session.post(
-                f"{DISCORD_API_URL}{route}", headers=headers
-            ) as resp:
+            async with self.client_session.post(f"{DISCORD_API_URL}{route}", headers=headers) as resp:
                 data = await resp.json()
         else:
             raise Exception("Other HTTP than GET and POST are currently not Supported")
@@ -181,9 +175,7 @@ class DiscordOAuthClient:
         except Unauthorized:
             return False
 
-    async def requires_authorization(
-        self, bearer: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer())
-    ):
+    async def requires_authorization(self, bearer: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer())):
         if bearer is None:
             raise Unauthorized
         if not await self.isAuthenticated(bearer.credentials):
