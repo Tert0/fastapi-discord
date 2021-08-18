@@ -78,11 +78,11 @@ class DiscordOAuthClient:
         if token:
             headers = {"Authorization": f"Bearer {token}"}
         if method == "GET":
-            resp = await self.client_session.get(f"{DISCORD_API_URL}{route}", headers=headers)
-            data = await resp.json()
+            async with self.client_session.get(f"{DISCORD_API_URL}{route}", headers=headers) as resp:
+                data = await resp.json()
         elif method == "POST":
-            resp = await self.client_session.post(f"{DISCORD_API_URL}{route}", headers=headers)
-            data = await resp.json()
+            async with self.client_session.post(f"{DISCORD_API_URL}{route}", headers=headers) as resp:
+                data = await resp.json()
         else:
             raise Exception("Other HTTP than GET and POST are currently not Supported")
         if resp.status == 401:
@@ -92,8 +92,8 @@ class DiscordOAuthClient:
         return data
 
     async def get_token_response(self, payload: PAYLOAD) -> TokenResponse:
-        resp = await self.client_session.post(DISCORD_TOKEN_URL, data=payload)
-        return await resp.json()
+        async with self.client_session.post(DISCORD_TOKEN_URL, data=payload) as resp:
+            return await resp.json()
 
     async def get_access_token(self, code: str) -> Tuple[Optional[str], Optional[str]]:
         payload: TokenGrantPayload = {
