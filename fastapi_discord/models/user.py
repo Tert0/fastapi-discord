@@ -7,7 +7,7 @@ class User(BaseModel):
     id: str
     username: str
     discriminator: str
-    avatar: str
+    avatar: Optional[str]
     avatar_url: Optional[str]
     locale: str
     email: Optional[str]
@@ -19,4 +19,7 @@ class User(BaseModel):
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        self.avatar_url = f"https://cdn.discordapp.com/avatars/{self.id}/{self.avatar}.png"
+        if self.avatar:
+            self.avatar_url = f"https://cdn.discordapp.com/avatars/{self.id}/{self.avatar}.png"
+        else:
+            self.avatar_url = "https://cdn.discordapp.com/embed/avatars/1.png"
