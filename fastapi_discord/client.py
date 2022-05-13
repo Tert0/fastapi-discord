@@ -74,13 +74,27 @@ class DiscordOAuthClient:
         Discord application client secret.
     redirect_uri:
         Discord application redirect URI.
+    proxy:
+        Optional proxy url
+    proxy_auth:
+        Optional aiohttp.BasicAuth proxy authentification
     """
 
-    def __init__(self, client_id, client_secret, redirect_uri, scopes=("identify",)):
+    def __init__(
+        self,
+        client_id,
+        client_secret,
+        redirect_uri,
+        scopes=("identify",),
+        proxy=None,
+        proxy_auth: aiohttp.BasicAuth = None,
+    ):
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
         self.scopes = "%20".join(scope for scope in scopes)
+        self.proxy = proxy
+        self.proxy_auth = proxy_auth
         self.client_session: aiohttp.ClientSession = aiohttp.ClientSession()
 
     def get_oauth_login_url(self, state: Optional[str] = None):
@@ -104,10 +118,20 @@ class DiscordOAuthClient:
         if token:
             headers = {"Authorization": f"Bearer {token}"}
         if method == "GET":
-            async with self.client_session.get(f"{DISCORD_API_URL}{route}", headers=headers) as resp:
+            async with self.client_session.get(
+                f"{DISCORD_API_URL}{route}",
+                headers=headers,
+                proxy=self.proxy,
+                proxy_auth=self.proxy_auth,
+            ) as resp:
                 data = await resp.json()
         elif method == "POST":
-            async with self.client_session.post(f"{DISCORD_API_URL}{route}", headers=headers) as resp:
+            async with self.client_session.post(
+                f"{DISCORD_API_URL}{route}",
+                headers=headers,
+                proxy=self.proxy,
+                proxy_auth=self.proxy_auth,
+            ) as resp:
                 data = await resp.json()
         else:
             raise Exception("Other HTTP than GET and POST are currently not Supported")
@@ -118,7 +142,12 @@ class DiscordOAuthClient:
         return data
 
     async def get_token_response(self, payload: PAYLOAD) -> TokenResponse:
-        async with self.client_session.post(DISCORD_TOKEN_URL, data=payload) as resp:
+        async with self.client_session.post(
+            DISCORD_TOKEN_URL,
+            data=payload,
+            proxy=self.proxy,
+            proxy_auth=self.proxy_auth,
+        ) as resp:
             return await resp.json()
 
     async def get_access_token(self, code: str) -> Tuple[str, str]:
