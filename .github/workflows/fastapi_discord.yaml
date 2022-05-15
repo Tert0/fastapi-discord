@@ -1,9 +1,7 @@
 name: Build and Deploy PyPi
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
 
 
 
