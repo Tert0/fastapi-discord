@@ -93,13 +93,13 @@ class DiscordOAuthClient:
     """
 
     def __init__(
-            self,
-            client_id,
-            client_secret,
-            redirect_uri,
-            scopes=("identify",),
-            proxy=None,
-            proxy_auth: aiohttp.BasicAuth = None,
+        self,
+        client_id,
+        client_secret,
+        redirect_uri,
+        scopes=("identify",),
+        proxy=None,
+        proxy_auth: aiohttp.BasicAuth = None,
     ):
         self.client_id = client_id
         self.client_secret = client_secret
@@ -135,18 +135,18 @@ class DiscordOAuthClient:
             headers = {"Authorization": f"Bearer {token}"}
         if method == "GET":
             async with self.client_session.get(
-                    f"{DISCORD_API_URL}{route}",
-                    headers=headers,
-                    proxy=self.proxy,
-                    proxy_auth=self.proxy_auth,
+                f"{DISCORD_API_URL}{route}",
+                headers=headers,
+                proxy=self.proxy,
+                proxy_auth=self.proxy_auth,
             ) as resp:
                 data = await resp.json()
         elif method == "POST":
             async with self.client_session.post(
-                    f"{DISCORD_API_URL}{route}",
-                    headers=headers,
-                    proxy=self.proxy,
-                    proxy_auth=self.proxy_auth,
+                f"{DISCORD_API_URL}{route}",
+                headers=headers,
+                proxy=self.proxy,
+                proxy_auth=self.proxy_auth,
             ) as resp:
                 data = await resp.json()
         else:
@@ -159,10 +159,10 @@ class DiscordOAuthClient:
 
     async def get_token_response(self, payload: PAYLOAD) -> TokenResponse:
         async with self.client_session.post(
-                DISCORD_TOKEN_URL,
-                data=payload,
-                proxy=self.proxy,
-                proxy_auth=self.proxy_auth,
+            DISCORD_TOKEN_URL,
+            data=payload,
+            proxy=self.proxy,
+            proxy_auth=self.proxy_auth,
         ) as resp:
             return await resp.json()
 
