@@ -70,8 +70,8 @@ class DiscordOAuthClient:
     client_secret: str
     redirect_uri: str
     scopes: str
-    proxy: str
-    proxy_auth: aiohttp.BasicAuth
+    proxy: Optional[str]
+    proxy_auth: Optional[aiohttp.BasicAuth]
     client_session: aiohttp.ClientSession
 
     """Client for Discord Oauth2.
