@@ -1,6 +1,8 @@
+import asyncio
 from typing import Dict, List, Optional, Tuple, Union
 
 import aiohttp
+import nest_asyncio
 from aiocache import cached
 from fastapi import Depends, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -64,6 +66,14 @@ def _tokens(resp: TokenResponse) -> Tuple[str, str]:
 
 
 class DiscordOAuthClient:
+    client_id: str
+    client_secret: str
+    redirect_uri: str
+    scopes: str
+    proxy: str
+    proxy_auth: aiohttp.BasicAuth
+    client_session: aiohttp.ClientSession
+
     """Client for Discord Oauth2.
 
     Parameters
@@ -74,6 +84,8 @@ class DiscordOAuthClient:
         Discord application client secret.
     redirect_uri:
         Discord application redirect URI.
+    scopes:
+        Optional Discord Oauth scopes
     proxy:
         Optional proxy url
     proxy_auth:
@@ -81,13 +93,13 @@ class DiscordOAuthClient:
     """
 
     def __init__(
-        self,
-        client_id,
-        client_secret,
-        redirect_uri,
-        scopes=("identify",),
-        proxy=None,
-        proxy_auth: aiohttp.BasicAuth = None,
+            self,
+            client_id,
+            client_secret,
+            redirect_uri,
+            scopes=("identify",),
+            proxy=None,
+            proxy_auth: aiohttp.BasicAuth = None,
     ):
         self.client_id = client_id
         self.client_secret = client_secret
@@ -95,7 +107,11 @@ class DiscordOAuthClient:
         self.scopes = "%20".join(scope for scope in scopes)
         self.proxy = proxy
         self.proxy_auth = proxy_auth
-        self.client_session: aiohttp.ClientSession = aiohttp.ClientSession()
+        nest_asyncio.apply()
+        asyncio.get_running_loop().run_until_complete(asyncio.create_task(self.initialize()))
+
+    async def initialize(self):
+        self.client_session = aiohttp.ClientSession()
 
     def get_oauth_login_url(self, state: Optional[str] = None):
         """
@@ -119,18 +135,18 @@ class DiscordOAuthClient:
             headers = {"Authorization": f"Bearer {token}"}
         if method == "GET":
             async with self.client_session.get(
-                f"{DISCORD_API_URL}{route}",
-                headers=headers,
-                proxy=self.proxy,
-                proxy_auth=self.proxy_auth,
+                    f"{DISCORD_API_URL}{route}",
+                    headers=headers,
+                    proxy=self.proxy,
+                    proxy_auth=self.proxy_auth,
             ) as resp:
                 data = await resp.json()
         elif method == "POST":
             async with self.client_session.post(
-                f"{DISCORD_API_URL}{route}",
-                headers=headers,
-                proxy=self.proxy,
-                proxy_auth=self.proxy_auth,
+                    f"{DISCORD_API_URL}{route}",
+                    headers=headers,
+                    proxy=self.proxy,
+                    proxy_auth=self.proxy_auth,
             ) as resp:
                 data = await resp.json()
         else:
@@ -143,10 +159,10 @@ class DiscordOAuthClient:
 
     async def get_token_response(self, payload: PAYLOAD) -> TokenResponse:
         async with self.client_session.post(
-            DISCORD_TOKEN_URL,
-            data=payload,
-            proxy=self.proxy,
-            proxy_auth=self.proxy_auth,
+                DISCORD_TOKEN_URL,
+                data=payload,
+                proxy=self.proxy,
+                proxy_auth=self.proxy_auth,
         ) as resp:
             return await resp.json()
 
