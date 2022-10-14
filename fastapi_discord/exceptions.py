@@ -27,3 +27,9 @@ class ScopeMissing(Exception):
     def __init__(self, scope: str):
         self.scope = scope
         super().__init__(self.scope)
+
+
+class ClientSessionNotInitialized(Exception):
+    """An exception raised when no Client Session is initialized but one would be needed"""
+
+    pass

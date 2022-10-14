@@ -7,7 +7,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from typing_extensions import TypedDict, Literal
 
 from .config import DISCORD_API_URL, DISCORD_OAUTH_AUTHENTICATION_URL, DISCORD_TOKEN_URL
-from .exceptions import RateLimited, ScopeMissing, Unauthorized, InvalidToken
+from .exceptions import RateLimited, ScopeMissing, Unauthorized, InvalidToken, ClientSessionNotInitialized
 from .models import Guild, GuildPreview, User
 
 
@@ -70,7 +70,7 @@ class DiscordOAuthClient:
     scopes: str
     proxy: Optional[str]
     proxy_auth: Optional[aiohttp.BasicAuth]
-    client_session: aiohttp.ClientSession = None
+    client_session: Optional[aiohttp.ClientSession] = None
 
     """Client for Discord Oauth2.
 
@@ -91,13 +91,13 @@ class DiscordOAuthClient:
     """
 
     def __init__(
-            self,
-            client_id,
-            client_secret,
-            redirect_uri,
-            scopes=("identify",),
-            proxy=None,
-            proxy_auth: aiohttp.BasicAuth = None,
+        self,
+        client_id,
+        client_secret,
+        redirect_uri,
+        scopes=("identify",),
+        proxy=None,
+        proxy_auth: aiohttp.BasicAuth = None,
     ):
         self.client_id = client_id
         self.client_secret = client_secret
@@ -131,23 +131,25 @@ class DiscordOAuthClient:
 
     @cached(ttl=550)
     async def request(self, route: str, token: str = None, method: Literal["GET", "POST"] = "GET"):
+        if self.client_session is None:
+            raise ClientSessionNotInitialized
         headers: Dict = {}
         if token:
             headers = {"Authorization": f"Bearer {token}"}
         if method == "GET":
             async with self.client_session.get(
-                    f"{DISCORD_API_URL}{route}",
-                    headers=headers,
-                    proxy=self.proxy,
-                    proxy_auth=self.proxy_auth,
+                f"{DISCORD_API_URL}{route}",
+                headers=headers,
+                proxy=self.proxy,
+                proxy_auth=self.proxy_auth,
             ) as resp:
                 data = await resp.json()
         elif method == "POST":
             async with self.client_session.post(
-                    f"{DISCORD_API_URL}{route}",
-                    headers=headers,
-                    proxy=self.proxy,
-                    proxy_auth=self.proxy_auth,
+                f"{DISCORD_API_URL}{route}",
+                headers=headers,
+                proxy=self.proxy,
+                proxy_auth=self.proxy_auth,
             ) as resp:
                 data = await resp.json()
         else:
@@ -159,11 +161,13 @@ class DiscordOAuthClient:
         return data
 
     async def get_token_response(self, payload: PAYLOAD) -> TokenResponse:
+        if self.client_session is None:
+            raise ClientSessionNotInitialized
         async with self.client_session.post(
-                DISCORD_TOKEN_URL,
-                data=payload,
-                proxy=self.proxy,
-                proxy_auth=self.proxy_auth,
+            DISCORD_TOKEN_URL,
+            data=payload,
+            proxy=self.proxy,
+            proxy_auth=self.proxy_auth,
         ) as resp:
             return await resp.json()
 

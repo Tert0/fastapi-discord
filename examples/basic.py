@@ -3,6 +3,7 @@ from typing import List
 from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse
 from fastapi_discord import DiscordOAuthClient, RateLimited, Unauthorized, User
+from fastapi_discord.exceptions import ClientSessionNotInitialized
 from fastapi_discord.models import GuildPreview
 
 app = FastAPI()
@@ -52,6 +53,12 @@ async def rate_limit_error_handler(_, e: RateLimited):
         {"error": "RateLimited", "retry": e.retry_after, "message": e.message},
         status_code=429,
     )
+
+
+@app.exception_handler(ClientSessionNotInitialized)
+async def client_session_error_handler(_, e: ClientSessionNotInitialized):
+    print(e)
+    return JSONResponse({"error": "Internal Error"}, status_code=500)
 
 
 @app.get("/user", dependencies=[Depends(discord.requires_authorization)], response_model=User)
