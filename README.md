@@ -21,6 +21,10 @@ discord = DiscordOAuthClient(
     "<client-id>", "<client-secret>", "<redirect-url>", ("identify", "guilds", "email")
 )  # scopes
 
+@app.on_event("startup")
+async def on_startup():
+    await discord.init()
+
 
 @app.get("/login")
 async def login():
@@ -72,6 +76,7 @@ async def get_user(user: User = Depends(discord.user)):
 async def get_guilds(guilds: List = Depends(discord.guilds)):
     return guilds
 ```
+
 # Inspired by
 [Starlette-Discord](https://github.com/nwunderly/starlette-discord)
 

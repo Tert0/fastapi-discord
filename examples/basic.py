@@ -12,6 +12,11 @@ discord = DiscordOAuthClient(
 )  # scopes
 
 
+@app.on_event("startup")
+async def on_startup():
+    await discord.init()
+
+
 @app.get("/login")
 async def login():
     return {"url": discord.oauth_login_url}
