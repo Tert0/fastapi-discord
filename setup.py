@@ -11,7 +11,7 @@ setup(
     long_description_content_type="text/markdown",
     author="Tert0",
     license="MIT",
-    install_requires=["fastapi==0.92.0", "aiohttp==3.8.3", "aiocache==0.12.0"],
+    install_requires=["fastapi==0.92.0", "aiohttp==3.8.4", "aiocache==0.12.0"],
     python_requires=">=3.5",
     url="https://github.com/Tert0/fastapi-discord",
 )
