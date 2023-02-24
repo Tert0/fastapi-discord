@@ -97,7 +97,7 @@ class DiscordOAuthClient:
         redirect_uri,
         scopes=("identify",),
         proxy=None,
-        proxy_auth: aiohttp.BasicAuth = None,
+        proxy_auth: Optional[aiohttp.BasicAuth] = None,
     ):
         self.client_id = client_id
         self.client_secret = client_secret
@@ -130,7 +130,7 @@ class DiscordOAuthClient:
     oauth_login_url = property(get_oauth_login_url)
 
     @cached(ttl=550)
-    async def request(self, route: str, token: str = None, method: Literal["GET", "POST"] = "GET"):
+    async def request(self, route: str, token: Optional[str] = None, method: Literal["GET", "POST"] = "GET"):
         if self.client_session is None:
             raise ClientSessionNotInitialized
         headers: Dict = {}
