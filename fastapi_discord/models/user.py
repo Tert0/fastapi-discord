@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 class User(BaseModel):
     id: str
+    global_name: str
     username: str
     discriminator: str
     avatar: Optional[str]
