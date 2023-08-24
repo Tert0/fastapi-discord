@@ -7,7 +7,6 @@ class User(BaseModel):
     id: str
     global_name: str
     username: str
-    discriminator: str
     avatar: Optional[str]
     avatar_url: Optional[str]
     locale: str
