@@ -6,8 +6,8 @@ from pydantic import BaseModel
 class User(BaseModel):
     id: str
     username: str
-    avatar: Optional[str]
     discriminator: str
+    avatar: Optional[str]
     avatar_url: Optional[str]
     locale: str
     email: Optional[str]
@@ -16,8 +16,7 @@ class User(BaseModel):
     flags: int
     premium_type: Optional[int]
     public_flags: int
-    global_name: str
-    
+
     def __init__(self, **data: Any):
         super().__init__(**data)
         if self.avatar:
