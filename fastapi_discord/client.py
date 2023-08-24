@@ -197,7 +197,9 @@ class DiscordOAuthClient:
             raise ScopeMissing("identify")
         route = "/users/@me"
         token = self.get_token(request)
-        return User(**(await self.request(route, token)))
+        test = await self.request(route, token)
+        print(test)
+        return User(**test)
 
     async def guilds(self, request: Request) -> List[GuildPreview]:
         if "guilds" not in self.scopes:
