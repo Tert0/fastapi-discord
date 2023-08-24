@@ -11,12 +11,12 @@ class User(BaseModel):
     avatar_url: Optional[str]
     locale: str
     email: Optional[str]
-    bot: Optional[bool]
     mfa_enabled: bool
     flags: int
     premium_type: Optional[int]
     public_flags: int
-
+    global_name: Optional[str]
+    
     def __init__(self, **data: Any):
         super().__init__(**data)
         if self.avatar:
