@@ -11,7 +11,7 @@ discord = DiscordOAuthClient(
     "<client-id>", "<client-secret>", "<redirect-url>", ("identify", "guilds", "email")
 )  # scopes
 
-# startup is now depriciated https://fastapi.tiangolo.com/advanced/events/#alternative-events-deprecated
+# startup is now deprecated https://fastapi.tiangolo.com/advanced/events/#alternative-events-deprecated
 # use lifespan https://fastapi.tiangolo.com/advanced/events/
 
 @asynccontextmanager
