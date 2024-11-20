@@ -14,10 +14,12 @@ discord = DiscordOAuthClient(
 # startup is now deprecated https://fastapi.tiangolo.com/advanced/events/#alternative-events-deprecated
 # use lifespan https://fastapi.tiangolo.com/advanced/events/
 
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     await discord.init()
     yield
+
 
 app = FastAPI()
 
@@ -70,7 +72,9 @@ async def client_session_error_handler(_, e: ClientSessionNotInitialized):
     return JSONResponse({"error": "Internal Error"}, status_code=500)
 
 
-@app.get("/user", dependencies=[Depends(discord.requires_authorization)], response_model=User)
+@app.get(
+    "/user", dependencies=[Depends(discord.requires_authorization)], response_model=User
+)
 async def get_user(user: User = Depends(discord.user)):
     return user
 
