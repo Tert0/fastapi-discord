@@ -9,23 +9,31 @@ PIP Package `fastapi-discord`
 You can find the Example in [examples/](https://github.com/Tert0/fastapi-discord/tree/master/examples)
 ```py
 from typing import List
-
+from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse
 from fastapi_discord import DiscordOAuthClient, RateLimited, Unauthorized, User
 from fastapi_discord.exceptions import ClientSessionNotInitialized
 from fastapi_discord.models import GuildPreview
 
-app = FastAPI()
 
 discord = DiscordOAuthClient(
     "<client-id>", "<client-secret>", "<redirect-url>", ("identify", "guilds", "email")
 )  # scopes
 
+# startup is now deprecated https://fastapi.tiangolo.com/advanced/events/#alternative-events-deprecated
+# use lifespan https://fastapi.tiangolo.com/advanced/events/
 
-@app.on_event("startup")
-async def on_startup():
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
     await discord.init()
+    yield
+
+app = FastAPI()
+
+# @app.on_event("startup")
+# async def on_startup():
+#     await discord.init()
 
 
 @app.get("/login")
