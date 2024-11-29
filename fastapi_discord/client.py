@@ -4,10 +4,10 @@ import aiohttp
 from aiocache import cached
 from fastapi import Depends, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from typing_extensions import TypedDict, Literal
+from typing_extensions import Literal, TypedDict
 
 from .config import DISCORD_API_URL, DISCORD_OAUTH_AUTHENTICATION_URL, DISCORD_TOKEN_URL
-from .exceptions import RateLimited, ScopeMissing, Unauthorized, InvalidToken, ClientSessionNotInitialized
+from .exceptions import ClientSessionNotInitialized, InvalidToken, RateLimited, ScopeMissing, Unauthorized
 from .models import Guild, GuildPreview, User
 
 
