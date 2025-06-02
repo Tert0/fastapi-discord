@@ -1,4 +1,4 @@
 fastapi==0.115.12
-aiohttp==3.12.4
+aiohttp==3.12.6
 aiocache==0.12.3
 uvicorn==0.34.2
