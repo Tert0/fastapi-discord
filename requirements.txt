@@ -1,4 +1,4 @@
-fastapi==0.123.5
+fastapi==0.123.7
 aiohttp==3.13.2
 aiocache==0.12.3
 uvicorn==0.38.0
