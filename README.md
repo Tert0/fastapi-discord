@@ -1,6 +1,9 @@
 [![PyPI version](https://badge.fury.io/py/fastapi-discord.svg)](https://badge.fury.io/py/fastapi-discord)
 [![PyPI Downloads](https://img.shields.io/pypi/dm/fastapi-discord.svg)](https://pypi.org/project/fastapi-discord)
 
+> [!WARNING]
+> This project has not been actively maintained for quite a while. Please consider forking or using an alternative.
+
 # FastAPI Discord (OAuth)
 Support for "Login with Discord"/ Discord OAuth for FastAPI.
 # Install
